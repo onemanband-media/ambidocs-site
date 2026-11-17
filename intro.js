@@ -93,7 +93,7 @@
   }
 
   // A woven fabric for the face padding, in place of the model's speckled one.
-  function fabricTexture(repeatX, repeatY) {
+  function fabricTexture() {
     const n = 64, c = document.createElement('canvas');
     c.width = n; c.height = n;
     const g = c.getContext('2d');
@@ -113,7 +113,7 @@
     }
     const tex = new T.CanvasTexture(c);
     tex.wrapS = tex.wrapT = T.RepeatWrapping;
-    tex.repeat.set(repeatX || FABRIC_REPEAT, repeatY || FABRIC_REPEAT);
+    tex.repeat.set(FABRIC_REPEAT, FABRIC_REPEAT);
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     return tex;
   }
@@ -189,23 +189,8 @@
   const GLASS_PART = 'Object_74', PADDING = (params.get('pad') || 'WicotZnvNvRZKUL').split(',');
   const GLASS_COLOR = '#' + (params.get('glass') || '3c4048');
 
-  const REMOVED = /^Object_(60|61|62|3[2-9])$/, BAND = /^Object_3[2-9]$/;
-  const GRAPHITE = 0x121316, GUNMETAL = 0x25272b, DARK_FABRIC = 0x2a2c30;
-
-  // Dissolve with a fine dither, so inner layers never show through.
-  function dissolving(m) {
-    m.onBeforeCompile = function (shader) {
-      shader.uniforms.uFade = fadeUniform;
-      shader.fragmentShader = shader.fragmentShader.replace('void main() {',
-        'uniform float uFade;\nvoid main() {\n  if (uFade < fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))))) discard;');
-    };
-    m.customProgramCacheKey = function () { return 'dissolve'; };
-    return m;
-  }
-
   // ---------- the headset model ----------
-  // Adapted from a model by pravinvamp (Sketchfab), CC BY 4.0: parts removed,
-  // band replaced and finish changed.
+  // "Apple Vision Pro" by pravinvamp (Sketchfab), CC BY 4.0.
   function useModel(gltf) {
     const model = gltf.scene;
     const holder = new T.Group();
@@ -223,33 +208,14 @@
     frontZ = box.max.z;
     const eyes = [];
     const parts = [];
-    const bandBox = new T.Box3();
     model.traverse(function (o) {
       if (!o.isMesh) return;
       const b = new T.Box3().setFromObject(o);
-      // Leave out the dial, the top button and the ribbed band; a plain strap
-      // of our own replaces the band below.
-      if (REMOVED.test(o.name)) {
-        if (BAND.test(o.name)) bandBox.union(b);
-        o.visible = false;
-        return;
-      }
       if (/^Object_(53|57)$/.test(o.name)) eyes.push(b);
       else parts.push({ mesh: o, z: b.getCenter(new T.Vector3()).z });
       if (params.get('tint')) {
         const ti = params.get('tint').split(',').indexOf(o.material.name);
         if (ti >= 0) o.material = new T.MeshBasicMaterial({ color: [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff][ti % 6] });
-      }
-      else if (o.name !== GLASS_PART && PADDING.indexOf(o.material.name) < 0) {
-        // Our own darker finish: bright metal becomes gunmetal, pale fabric
-        // becomes dark grey, and nothing glows.
-        const m = o.material.clone();
-        const bright = (m.color.r + m.color.g + m.color.b) / 3 > 0.35;
-        if (m.map) m.color.set(DARK_FABRIC);
-        else if (bright) m.color.set(GUNMETAL);
-        if (m.emissive) m.emissive.set(0x000000);
-        m.emissiveMap = null;
-        o.material = m;
       }
       if (o.name === GLASS_PART) {
         // Lift the glass from near-black so the scene reads in its reflection.
@@ -275,36 +241,17 @@
     const backLimit = (eyes[0] ? eyes[0].min.z : box.min.z + (box.max.z - box.min.z) * 0.6) - 0.25;
     parts.forEach(function (part) {
       if (part.z >= backLimit) return;
-      const m = dissolving(part.mesh.material.clone());
-      // Our own finish: plain graphite in place of the pale knit.
-      m.map = null;
-      m.color.set(GRAPHITE);
-      m.metalness = 0.15;
-      m.roughness = 0.85;
+      // Dissolve with a fine dither, so inner layers never show through.
+      const m = part.mesh.material.clone();
+      m.onBeforeCompile = function (shader) {
+        shader.uniforms.uFade = fadeUniform;
+        shader.fragmentShader = shader.fragmentShader.replace('void main() {',
+          'uniform float uFade;\nvoid main() {\n  if (uFade < fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))))) discard;');
+      };
+      m.customProgramCacheKey = function () { return 'dissolve'; };
       part.mesh.material = m;
       fading.push(part.mesh);
     });
-    if (!bandBox.isEmpty()) {
-      // A plain strap round the back, where the ribbed band was.
-      const c = bandBox.getCenter(new T.Vector3()), sz = bandBox.getSize(new T.Vector3());
-      const a = sz.x / 2, h = sz.y * 0.5, N = 48, pos = [], uv = [], idx = [];
-      for (let i = 0; i <= N; i++) {
-        const th = (i / N) * Math.PI;
-        const x = c.x + a * Math.cos(th), z = bandBox.max.z - sz.z * Math.sin(th);
-        pos.push(x, c.y - h / 2, z, x, c.y + h / 2, z);
-        uv.push(i / N, 0, i / N, 1);
-        if (i < N) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
-      }
-      const g = new T.BufferGeometry();
-      g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
-      g.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
-      g.setIndex(idx);
-      g.computeVertexNormals();
-      const weave = fabricTexture(48, 6);
-      const strap = new T.Mesh(g, dissolving(new T.MeshStandardMaterial({ color: 0x2c2e33, map: weave, bumpMap: weave, bumpScale: 0.004, roughness: 0.95, metalness: 0, side: T.DoubleSide })));
-      headset.add(strap);
-      fading.push(strap);
-    }
     eyes.forEach(function (b) {
       const c = b.getCenter(new T.Vector3());
       const sz = b.getSize(new T.Vector3());
