@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ambidocs — immersive documentaries</title>
+<meta name="description" content="Ambidocs is a production company dedicated to immersive, place-based storytelling. Makers of The Great American Story for Apple Vision Pro.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="scrim" aria-hidden="true"></div>
+
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-shimmer"></div>
+  <canvas id="headset"></canvas>
+  <p class="intro-word">AMBIDOCS</p>
+  <canvas id="dust"></canvas>
+  <p class="intro-hint">Scroll to step inside</p>
+</div>
+
+<header class="top">
+  <a class="wordmark" href="#top">Ambidocs</a>
+  <nav>
+    <a href="#story">The app</a>
+    <a href="#team">Who we are</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <div class="intro-space" aria-hidden="true"></div>
+
+  <section class="stage" id="stage">
+    <div class="hero">
+      <p class="eyebrow">Immersive documentaries</p>
+      <h1>Step inside the places and people that make America.</h1>
+      <button id="tilt-button" class="tilt-button" type="button" hidden>Tilt to look around</button>
+    </div>
+
+    <div class="carousel">
+      <button type="button" id="pill-prev" class="pill-arrow" aria-label="Previous">&lsaquo;</button>
+      <button type="button" id="pill-next" class="pill-arrow" aria-label="Next">&rsaquo;</button>
+    <div class="pills" id="pills">
+      <section class="panel" id="story">
+        <p class="eyebrow">Our first project</p>
+        <h2>The Great American Story</h2>
+        <p class="lede">A 3D immersive app for Apple Vision Pro.</p>
+        <p>An educational and experiential app that lets viewers step inside breathtaking, immersive stories filmed across the US. Rather than watching a documentary on a screen, viewers can virtually stand in the scene itself — beside a park ranger at a geyser basin, under the cherry blossoms at the Tidal Basin in DC, on stage with a Broadway actor in New York — and hear the story told as if they were there in person.</p>
+      </section>
+
+      <section class="panel" id="filmed">
+        <p class="eyebrow">How it's filmed</p>
+        <h2>A sense of presence that traditional film can't achieve.</h2>
+        <p>Every story is captured with the Blackmagic URSA Cine Immersive, one of the most advanced cameras released to date.</p>
+        <ul class="facts">
+          <li><strong>16K, 3D, 180° immersive video</strong><span>Lifelike depth and detail that fills your entire field of view.</span></li>
+          <li><strong>Spatial audio</strong><span>Sound comes from where it happened.</span></li>
+          <li><strong>Made for Apple Immersive Video</strong><span>Designed specifically for Apple Vision Pro's format.</span></li>
+        </ul>
+        <p class="pull">Viewers don't watch the story — they're in it.</p>
+      </section>
+
+      <section class="panel" id="team">
+        <p class="eyebrow">Who we are</p>
+        <h2>Ambidocs</h2>
+        <p>A production company dedicated to immersive, place-based storytelling. Our mission is to tell American stories in the most vivid medium ever created — so that anyone, anywhere, can experience them firsthand.</p>
+        <div class="people">
+          <article>
+            <img src="assets/people/eammon.jpg" alt="Eammon Atkinson beside the immersive camera" width="320" height="320">
+            <div>
+              <h3>Eammon Atkinson</h3>
+              <p class="role">Founder, Director of Photography</p>
+              <p>An award-winning cameraman with 10 years' experience working for leading brands and broadcast networks. His work has appeared in ad campaigns in Times Square, for brands including Toyota, Lamborghini, Facebook and Uber. In broadcast news, he has worked with organisations including the BBC, CBS News and ABC.</p>
+            </div>
+          </article>
+          <article>
+            <img src="assets/people/joie.jpg" alt="Joie Chen" width="320" height="320">
+            <div>
+              <h3>Joie Chen</h3>
+              <p class="role">Head of Storytelling</p>
+              <p>An Emmy award-winning journalist who has spent her career telling compelling and captivating stories across America and the world. Best known for her decade as a primary anchor on CNN and CNN International, she has also served as a White House correspondent for CBS News and on the legendary “CBS Sunday Morning”, and as anchor and senior correspondent for Al Jazeera America's prime time program “America Tonight”.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="interview">
+        <p class="eyebrow">Taking part</p>
+        <h2>What an interview involves</h2>
+        <p>We'd love to include your story. You'll simply talk with us about what you know and love.</p>
+        <ul class="facts">
+          <li><strong>About 20 minutes on camera</strong><span>Conversational and relaxed.</span></li>
+          <li><strong>A crew of 1–2 people</strong><span>No big production footprint.</span></li>
+          <li><strong>Roughly 15 minutes each side</strong><span>For setup and pack-down.</span></li>
+          <li><strong>Under an hour in total</strong><span>At a location that suits you and your story.</span></li>
+        </ul>
+      </section>
+
+      <section class="panel" id="contact">
+        <p class="eyebrow">Contact</p>
+        <h2>Have a story we should film?</h2>
+        <p><a class="mail" href="mailto:eammon@ambidocs.com">eammon@ambidocs.com</a></p>
+        <p class="small">Ambidocs · Washington, DC</p>
+        <p class="credit">© 2026 Ambidocs. Headset model by pravinvamp, CC BY 4.0.</p>
+      </section>
+    </div>
+      <p class="pill-count" id="pill-count" aria-live="polite"></p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+window.AMBIDOCS_SCENES = [
+  { image: 'assets/scenes/falls.jpg', depth: 'assets/scenes/falls-depth.jpg', caption: 'Lower Falls, Yellowstone' },
+  { image: 'assets/scenes/pine.jpg', depth: 'assets/scenes/pine-depth.jpg', caption: 'Grand Canyon of the Yellowstone' },
+  { image: 'assets/scenes/sunflare.jpg', depth: 'assets/scenes/sunflare-depth.jpg', caption: 'Sunrise over the canyon, Yellowstone' },
+  { image: 'assets/scenes/canyon_sunrise.jpg', depth: 'assets/scenes/canyon_sunrise-depth.jpg', caption: 'Artist Point, Yellowstone' }
+];
+</script>
+<script src="scene.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="intro.js"></script>
+<script src="pills.js"></script>
+</body>
+</html>
